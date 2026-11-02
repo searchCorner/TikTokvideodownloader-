@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Downloader · Real Data & Working Downloads</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    body { background: #5c4033; background: linear-gradient(145deg, #5c4033 0%, #4a3525 100%); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px 12px; overflow-x: hidden; }
+    .welcome-heading { text-align: center; color: #f5ede4; font-size: 1.7rem; font-weight: 600; margin-bottom: 20px; text-shadow: 0 4px 12px rgba(0,0,0,0.3); padding: 0 10px; }
+    .welcome-heading i { color: #fe2c55; margin-right: 8px; font-size: 1.8rem; }
+    
+    .app-container { max-width: 440px; width: 100%; background: #fff; border-radius: 32px; box-shadow: 0 25px 45px -12px rgba(0,0,0,0.4); padding: 24px 20px; overflow: hidden; }
+    
+    .page-home { display: flex; flex-direction: column; gap: 16px; }
+    .page-result { display: none; flex-direction: column; gap: 14px; max-height: 85vh; overflow-y: auto; padding-right: 2px; }
+    .page-result.active { display: flex; }
+    .page-home.hidden { display: none; }
+    
+    .app-header { display: flex; align-items: center; gap: 10px; }
+    .app-header i { font-size: 28px; color: #fe2c55; }
+    .app-header h1 { font-size: 1.5rem; font-weight: 700; color: #1a1a1f; }
+    .subtitle { font-size: 0.9rem; color: #6b6b7a; margin-top: -6px; }
+    
+    .input-wrapper { display: flex; background: #f2f4f8; border-radius: 60px; padding: 4px 6px; align-items: center; border: 1px solid #e2e6ee; width: 100%; }
+    .input-wrapper input { flex: 1; border: none; background: transparent; padding: 12px 10px; font-size: 0.95rem; outline: none; min-width: 0; }
+    .paste-btn { background: #fff; border: 1px solid #dbe0ea; border-radius: 40px; padding: 8px 14px; font-size: 0.85rem; font-weight: 500; color: #1e1e2a; cursor: pointer; display: flex; align-items: center; gap: 5px; white-space: nowrap; flex-shrink: 0; }
+    .paste-btn:hover { background: #f0f2f8; }
+    
+    .btn-primary { background: #fe2c55; border: none; border-radius: 60px; padding: 14px 20px; font-size: 1.05rem; font-weight: 600; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer; box-shadow: 0 8px 20px -6px rgba(254,44,85,0.45); width: 100%; }
+    .btn-primary:hover { background: #e51e48; }
+    
+    /* অ্যাড স্পেস স্টাইল */
+    .ad-space { background: #f6f8fe; border: 2px dashed #c8cedf; border-radius: 20px; width: 100%; min-height: 220px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #82869b; font-weight: 500; margin-top: 4px; padding: 10px; overflow: hidden; }
+    .ad-space iframe { max-width: 100%; }
+    
+    /* বাটনের ভেতরের অ্যাড স্পেস */
+    .btn-ad-wrap { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+    .btn-ad-slot { width: 100%; min-height: 56px; display: flex; align-items: center; justify-content: center; background: #f6f8fe; border: 1px dashed #c8cedf; border-radius: 12px; padding: 4px; overflow: hidden; }
+    .btn-ad-slot iframe { max-width: 100%; }
+    
+    .profile-row { display: flex; align-items: center; gap: 12px; background: #f2f5fd; padding: 12px 14px; border-radius: 20px; border: 1px solid #e2e8f5; }
+    .avatar { width: 54px; height: 54px; border-radius: 50%; background: #ccc; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; font-weight: 700; flex-shrink: 0; border: 2px solid #fff; background-size: cover; background-position: center; }
+    .profile-info h3 { font-size: 1.1rem; font-weight: 700; color: #12121a; line-height: 1.2; word-break: break-all; }
+    .profile-info p { font-size: 0.8rem; color: #4e5266; display: flex; align-items: center; gap: 4px; margin-top: 2px; font-weight: 500; }
+    .profile-info p i { color: #fe2c55; }
+    
+    .video-desc { background: #fff; padding: 12px 14px; border-radius: 16px; font-size: 0.9rem; line-height: 1.4; color: #1a1a24; border: 1px solid #edf0f7; border-left: 4px solid #fe2c55; box-shadow: 0 4px 10px rgba(0,0,0,0.03); word-break: break-word; }
+    .video-desc i { color: #7a7e94; margin-right: 6px; }
+    
+    .media-box { width: 100%; border-radius: 20px; overflow: hidden; background: #000; border: 1px solid #e2e8f5; display: flex; justify-content: center; align-items: center; max-height: 260px; }
+    .media-box img { width: 100%; height: 100%; object-fit: contain; display: block; }
+    
+    .download-action-grid { display: flex; flex-direction: column; gap: 12px; margin-top: 2px; }
+    .action-btn { width: 100%; border-radius: 50px; padding: 14px 18px; font-size: 1rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; border: none; transition: all 0.2s; box-shadow: 0 6px 15px -4px rgba(0,0,0,0.12); }
+    .action-btn:hover { transform: translateY(-2px); }
+    .btn-video { background: linear-gradient(135deg, #fe2c55 0%, #e01e43 100%); color: #fff; }
+    .btn-audio { background: linear-gradient(135deg, #25f4ee 0%, #00d2cb 100%); color: #0f2b2a; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000; visibility: hidden; opacity: 0; transition: opacity 0.2s, visibility 0.2s; }
+    .modal-overlay.show { visibility: visible; opacity: 1; }
+    
+    .modal-card { background: #fff; max-width: 380px; width: 100%; border-radius: 32px; padding: 24px 20px; text-align: center; box-shadow: 0 30px 60px -15px rgba(0,0,0,0.5); position: relative; display: flex; flex-direction: column; gap: 14px; }
+    .modal-close { position: absolute; top: 14px; right: 16px; background: #f0f3fa; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 1.1rem; font-weight: 600; color: #515168; cursor: pointer; z-index: 10; }
+    
+    @keyframes pulseZoom {
+      0% { transform: scale(0.85); opacity: 0.5; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .countdown-number { font-size: 5rem; font-weight: 900; color: #fe2c55; line-height: 1; margin: 4px 0; animation: pulseZoom 0.8s infinite ease-in-out; text-shadow: 0 8px 20px rgba(254,44,85,0.3); }
+    
+    /* মোডালের ভেতরের অ্যাড স্পেস */
+    .modal-ad-space { background: #f6f8fe; border: 2px dashed #cbd2e1; border-radius: 16px; width: 100%; min-height: 140px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #82869b; font-size: 0.85rem; font-weight: 500; padding: 8px; overflow: hidden; }
+    .modal-ad-space iframe { max-width: 100%; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="welcome-heading"><i class="fab fa-tiktok"></i> Welcome Tik Tok download website!</div>
+
+  <div class="app-container">
+    <!-- PAGE 1 -->
+    <div class="page-home" id="homePage">
+      <div class="app-header"><i class="fab fa-tiktok"></i><h1>TikTok Video Downloader</h1></div>
+      <div class="subtitle">Download without watermark · fast & free</div>
+      <div class="input-wrapper">
+        <input type="text" id="videoUrlInput" placeholder="Paste TikTok link here...">
+        <button class="paste-btn" id="pasteBtn"><i class="fas fa-paste"></i> Paste</button>
+      </div>
+      <button class="btn-primary" id="downloadTriggerBtn"><i class="fas fa-download"></i> Download</button>
+      
+      <!-- হোম পেজের অ্যাড স্পেস (300x250) -->
+      <div class="ad-space" id="homeAdSlot">
+        <script>
+          atOptions = {
+            'key' : '415b74d4b054fe34673568e72274c08f',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bellnewyork.org/22/415b74d4b054fe34673568e72274c08f"></script>
+      </div>
+    </div>
+
+    <!-- PAGE 2 -->
+    <div class="page-result" id="resultPage">
+      <div class="profile-row">
+        <div class="avatar" id="creatorAvatar"></div>
+        <div class="profile-info">
+          <h3 id="creatorName">লোড হচ্ছে...</h3>
+          <p id="creatorHandle"><i class="fas fa-spinner fa-spin"></i> ডেটা আনা হচ্ছে</p>
+        </div>
+      </div>
+      
+      <div class="video-desc" id="videoDescription">
+        <i class="fas fa-quote-left"></i> <span id="descriptionText">অনুগ্রহ করে অপেক্ষা করুন...</span>
+      </div>
+
+      <div class="media-box" id="mediaBox">
+        <img id="videoCoverImg" src="" alt="TikTok Video Cover">
+      </div>
+
+      <div class="download-action-grid">
+        <!-- ভিডিও ডাউনলোড বাটন + এর ভেতরের অ্যাড (320x50) -->
+        <div class="btn-ad-wrap">
+          <div class="btn-ad-slot">
+            <script>
+              atOptions = {
+                'key' : 'a81654a7c159eb1354d5ec01be28ca5e',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+              };
+            </script>
+            <script src="https://bellnewyork.org/22/a81654a7c159eb1354d5ec01be28ca5e"></script>
+          </div>
+          <button class="action-btn btn-video" id="downloadVideoBtn">
+            <i class="fas fa-video"></i> Download Video
+          </button>
+        </div>
+
+        <!-- অডিও ডাউনলোড বাটন + এর ভেতরের অ্যাড (320x50) -->
+        <div class="btn-ad-wrap">
+          <div class="btn-ad-slot">
+            <script>
+              atOptions = {
+                'key' : 'a81654a7c159eb1354d5ec01be28ca5e',
+                'format' : 'iframe',
+                'height' : 50,
+                'width' : 320,
+                'params' : {}
+              };
+            </script>
+            <script src="https://bellnewyork.org/22/a81654a7c159eb1354d5ec01be28ca5e"></script>
+          </div>
+          <button class="action-btn btn-audio" id="downloadAudioBtn">
+            <i class="fas fa-music"></i> Download Audio (MP3)
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="countdownModal">
+    <div class="modal-card">
+      <button class="modal-close" id="closeModalBtn">✕</button>
+      <h3 style="font-size: 1.1rem; color: #1a1a24;">Preparing your download...</h3>
+      <div class="countdown-number" id="countdownDisplay">5</div>
+      <p style="font-size: 0.85rem; color: #6b6b7a;">Please wait while we fetch your file</p>
+      
+      <!-- মোডালের অ্যাড স্পেস (300x250) -->
+      <div class="modal-ad-space">
+        <script>
+          atOptions = {
+            'key' : '415b74d4b054fe34673568e72274c08f',
+            'format' : 'iframe',
+            'height' : 250,
+            'width' : 300,
+            'params' : {}
+          };
+        </script>
+        <script src="https://bellnewyork.org/22/415b74d4b054fe34673568e72274c08f"></script>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const homePage = document.getElementById('homePage');
+      const resultPage = document.getElementById('resultPage');
+      const downloadTriggerBtn = document.getElementById('downloadTriggerBtn');
+      const videoUrlInput = document.getElementById('videoUrlInput');
+      const pasteBtn = document.getElementById('pasteBtn');
+
+      const creatorNameEl = document.getElementById('creatorName');
+      const creatorHandleEl = document.getElementById('creatorHandle');
+      const descriptionTextEl = document.getElementById('descriptionText');
+      const creatorAvatarEl = document.getElementById('creatorAvatar');
+      const videoCoverImg = document.getElementById('videoCoverImg');
+
+      const modalOverlay = document.getElementById('countdownModal');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const countdownDisplay = document.getElementById('countdownDisplay');
+
+      const downloadVideoBtn = document.getElementById('downloadVideoBtn');
+      const downloadAudioBtn = document.getElementById('downloadAudioBtn');
+
+      let countdownInterval = null;
+      let currentCountdown = 5;
+      let currentVideoData = null;
+
+      async function fetchTikTokData(tiktokUrl) {
+        const apiUrl = 'https://www.tikwm.com/api/';
+        const formData = new URLSearchParams();
+        formData.append('url', tiktokUrl);
+        formData.append('hd', '1');
+
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: formData
+          });
+
+          if (!response.ok) throw new Error('Network error');
+          const json = await response.json();
+
+          if (json.code !== 0 || !json.data) {
+            throw new Error(json.msg || 'Invalid API response');
+          }
+
+          return json.data;
+        } catch (error) {
+          console.error('Fetch error:', error);
+          return null;
+        }
+      }
+
+      function updateResultPage(data) {
+        if (!data) {
+          creatorNameEl.textContent = 'ডেটা পাওয়া যায়নি';
+          creatorHandleEl.innerHTML = `<i class="fas fa-exclamation-triangle"></i> লিংক সঠিক নয়`;
+          descriptionTextEl.textContent = 'TikTok-এর ডেটা লোড করা যায়নি। সঠিক লিংক প্রদান করুন।';
+          creatorAvatarEl.style.backgroundImage = 'none';
+          videoCoverImg.src = '';
+          return;
+        }
+
+        const author = data.author || {};
+        const uniqueId = author.unique_id || 'unknown';
+        const nickname = author.nickname || uniqueId;
+        const avatarUrl = author.avatar || '';
+        const coverUrl = data.cover || data.origin_cover || '';
+
+        creatorNameEl.textContent = `@${uniqueId}`;
+        creatorHandleEl.innerHTML = `<i class="fas fa-check-circle"></i> ${nickname}`;
+        descriptionTextEl.textContent = data.title || 'কোনো ক্যাপশন নেই';
+        
+        if (coverUrl) {
+          videoCoverImg.src = coverUrl;
+        }
+
+        if (avatarUrl) {
+          creatorAvatarEl.style.backgroundImage = `url('${avatarUrl}')`;
+          creatorAvatarEl.textContent = '';
+        } else {
+          creatorAvatarEl.style.backgroundImage = 'none';
+          creatorAvatarEl.textContent = uniqueId.charAt(0).toUpperCase();
+        }
+
+        currentVideoData = {
+          video: data.hdplay || data.play,
+          audio: data.music
+        };
+      }
+
+      function triggerDownload(url, filename) {
+        if (!url) {
+          alert('ডাউনলোড লিংক পাওয়া যায়নি।');
+          return;
+        }
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+
+      pasteBtn.addEventListener('click', async () => {
+        try {
+          const text = await navigator.clipboard.readText();
+          videoUrlInput.value = text;
+        } catch (err) {
+          alert('ক্লিপবোর্ড থেকে পেস্ট করা সম্ভব হয়নি, ম্যানুয়ালি পেস্ট করুন।');
+        }
+      });
+
+      downloadTriggerBtn.addEventListener('click', async () => {
+        const url = videoUrlInput.value.trim();
+        if (!url) {
+          alert('অনুগ্রহ করে একটি TikTok লিংক পেস্ট করুন।');
+          return;
+        }
+
+        homePage.classList.add('hidden');
+        resultPage.classList.add('active');
+
+        creatorNameEl.textContent = 'লোড হচ্ছে...';
+        creatorHandleEl.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ডেটা আনা হচ্ছে`;
+        descriptionTextEl.textContent = 'অনুগ্রহ করে অপেক্ষা করুন...';
+        videoCoverImg.src = '';
+
+        const data = await fetchTikTokData(url);
+        updateResultPage(data);
+      });
+
+      function startDownloadProcess(type) {
+        if (!currentVideoData) {
+          alert('ভিডিও ডেটা পাওয়া যায়নি।');
+          return;
+        }
+
+        const url = type === 'video' ? currentVideoData.video : currentVideoData.audio;
+        const filename = `tiktok_${type}_${Date.now()}.${type === 'audio' ? 'mp3' : 'mp4'}`;
+
+        startCountdown();
+
+        setTimeout(() => {
+          triggerDownload(url, filename);
+        }, 5000);
+      }
+
+      downloadVideoBtn.addEventListener('click', () => startDownloadProcess('video'));
+      downloadAudioBtn.addEventListener('click', () => startDownloadProcess('audio'));
+
+      function startCountdown() {
+        if (countdownInterval) clearInterval(countdownInterval);
+        currentCountdown = 5;
+        countdownDisplay.textContent = currentCountdown;
+        modalOverlay.classList.add('show');
+
+        countdownInterval = setInterval(() => {
+          currentCountdown -= 1;
+          countdownDisplay.textContent = currentCountdown;
+
+          if (currentCountdown <= 0) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+            setTimeout(() => {
+              modalOverlay.classList.remove('show');
+            }, 300);
+          }
+        }, 1000);
+      }
+
+      function closeCountdownModal() {
+        if (countdownInterval) {
+          clearInterval(countdownInterval);
+          countdownInterval = null;
+        }
+        modalOverlay.classList.remove('show');
+      }
+
+      closeModalBtn.addEventListener('click', closeCountdownModal);
+      modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) closeCountdownModal();
+      });
+    })();
+  </script>
+</body>
+</html>
